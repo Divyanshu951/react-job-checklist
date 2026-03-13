@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Divyanshu's Frontend Intern Readiness Tracker</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+      body {
+        background: #09090b;
+        color: #fafafa;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* checkbox */
+
+      .check-container {
+        display: flex;
+        align-items: flex-start;
+        cursor: pointer;
+      }
+
+      .check-input {
+        position: absolute;
+        opacity: 0;
+        height: 0;
+        width: 0;
+      }
+
+      .checkmark {
+        flex-shrink: 0;
+        height: 16px;
+        width: 16px;
+        background: transparent;
+        border: 1px solid #27272a;
+        border-radius: 4px;
+        margin-right: 12px;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+      }
+
+      .check-container:hover .checkmark {
+        border-color: #a1a1aa;
+      }
+
+      .check-input:checked ~ .checkmark {
+        background: #fafafa;
+        border-color: #fafafa;
+      }
+
+      .checkmark:after {
+        content: "";
+        display: none;
+        width: 4px;
+        height: 8px;
+        border: solid #18181b;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+        margin-bottom: 2px;
+      }
+
+      .check-input:checked ~ .checkmark:after {
+        display: block;
+      }
+
+      .label-text {
+        color: #fafafa;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        user-select: none;
+        transition: 0.15s;
+        font-weight: 500;
+      }
+
+      .check-input:checked ~ .label-text {
+        color: #a1a1aa;
+        text-decoration: line-through;
+      }
+    </style>
+  </head>
+
+  <body class="min-h-screen p-6 md:p-12">
+    <div class="max-w-5xl mx-auto">
+      <header class="mb-10">
+        <h1 class="text-3xl md:text-4xl font-bold tracking-tight mb-2">
+          Frontend Intern Readiness
+        </h1>
+        <p class="text-zinc-400 text-sm md:text-base">
+          Target: April 2026. The stack companies actually hire for.
+        </p>
+      </header>
+
+      <div
+        class="bg-zinc-950 border border-zinc-800 rounded-xl p-6 mb-12 shadow-sm sticky top-4 z-50 backdrop-blur-md"
+      >
+        <div class="flex justify-between items-end mb-4">
+          <div>
+            <h3 class="text-sm font-semibold">Deployment Readiness</h3>
+            <p class="text-xs text-zinc-400 mt-1" id="stats-text">
+              0 / 0 tasks completed
+            </p>
+          </div>
+
+          <span id="progress-text" class="text-2xl font-bold">0%</span>
+        </div>
+
+        <div class="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
+          <div
+            id="progress-fill"
+            class="bg-white h-2 rounded-full transition-all duration-500 w-0"
+          ></div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="app"></div>
+
+      <div
+        class="mt-12 pt-8 border-t border-zinc-800 flex justify-between items-center"
+      >
+        <p class="text-xs text-zinc-400">
+          Speed matters. Max 3 days per project.
+        </p>
+
+        <button
+          onclick="resetProgress()"
+          class="text-sm text-zinc-400 hover:text-white transition px-4 py-2 rounded-md hover:bg-zinc-800"
+        >
+          Reset Progress
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const checklistData = [
+        {
+          title: "1. The Minimum Hireable Stack",
+          items: [
+            "Semantic HTML & Accessibility basics",
+            "CSS (Flexbox, Grid, Responsive)",
+            "JavaScript (ES6+, Array methods, Async/Await)",
+            "React Core (JSX, Props, State, Hooks)",
+            "React Router (DOM Navigation)",
+            "Tailwind CSS (Styling standard)",
+            "API Fetching (Handling loading & errors)",
+            "Git (Branches, clean commits, PRs)",
+            "Deployment (Vercel / Netlify live links)",
+          ],
+        },
+
+        {
+          title: "2. The 2026 Modern Stack (Expected)",
+          items: [
+            "TypeScript basics (types, interfaces, generics)",
+            "Next.js basics (Pages, App Router, SSR basics)",
+            "Vite (Standard SPA build tool)",
+            "TanStack Query (Caching, background refetching)",
+            "shadcn/ui / Radix (Headless UI components)",
+            "Zustand / Context API (Global State)",
+            "React Hook Form + Zod (Validation)",
+          ],
+        },
+
+        {
+          title: "3. UI & Performance Signals",
+          items: [
+            "Loading states (Skeleton loaders)",
+            "Empty states & Error boundaries",
+            "Mobile-first responsive design",
+            "Clean GitHub repository structure",
+            "Descriptive README files for all projects",
+          ],
+        },
+
+        {
+          title: "4. The 4 Essential Portfolio Projects",
+          items: [
+            "Task Manager (CRUD, local storage, filtering)",
+            "Movie/API Search App (Fetch, dynamic routing, debouncing)",
+            "E-commerce Store UI (Cart state, layout, Context/Zustand)",
+            "Admin Dashboard (Sidebar, charts, data tables)",
+          ],
+        },
+      ];
+
+      const appContainer = document.getElementById("app");
+      const progressFill = document.getElementById("progress-fill");
+      const progressText = document.getElementById("progress-text");
+      const statsText = document.getElementById("stats-text");
+
+      let totalItems = 0;
+
+      const STORAGE_KEY = "reactInternTracker";
+
+      function init() {
+        renderChecklist();
+        loadProgress();
+        updateProgressBar();
+
+        appContainer.addEventListener("change", (e) => {
+          if (e.target.type === "checkbox") {
+            saveProgress();
+            updateProgressBar();
+          }
+        });
+      }
+
+      function renderChecklist() {
+        let html = "";
+
+        checklistData.forEach((section, sectionIndex) => {
+          html += `
+<div class="bg-zinc-950 border border-zinc-800 rounded-xl p-6 shadow-sm">
+
+<h2 class="text-base font-semibold mb-4">
+${section.title}
+</h2>
+
+<div class="flex flex-col space-y-1">
+`;
+
+          section.items.forEach((item, itemIndex) => {
+            totalItems++;
+
+            const id = `item-${sectionIndex}-${itemIndex}`;
+
+            html += `
+
+<label class="check-container" for="${id}">
+
+<input type="checkbox" id="${id}" class="check-input">
+
+<span class="checkmark"></span>
+
+<span class="label-text">${item}</span>
+
+</label>
+
+`;
+          });
+
+          html += `</div></div>`;
+        });
+
+        appContainer.innerHTML = html;
+      }
+
+      function saveProgress() {
+        const checkboxes = document.querySelectorAll(".check-input");
+
+        const savedData = {};
+
+        checkboxes.forEach((box) => {
+          savedData[box.id] = box.checked;
+        });
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(savedData));
+      }
+
+      function loadProgress() {
+        const savedData = JSON.parse(localStorage.getItem(STORAGE_KEY));
+
+        if (!savedData) return;
+
+        const checkboxes = document.querySelectorAll(".check-input");
+
+        checkboxes.forEach((box) => {
+          if (savedData[box.id]) box.checked = true;
+        });
+      }
+
+      function updateProgressBar() {
+        const checkboxes = document.querySelectorAll(".check-input");
+
+        const checkedItems = [...checkboxes].filter(
+          (box) => box.checked,
+        ).length;
+
+        const percentage = Math.round((checkedItems / totalItems) * 100) || 0;
+
+        progressFill.style.width = `${percentage}%`;
+
+        progressText.innerText = `${percentage}%`;
+
+        statsText.innerText = `${checkedItems} / ${totalItems} tasks completed`;
+      }
+
+      function resetProgress() {
+        if (confirm("Are you sure you want to reset all progress?")) {
+          localStorage.removeItem(STORAGE_KEY);
+
+          document
+            .querySelectorAll(".check-input")
+            .forEach((box) => (box.checked = false));
+
+          updateProgressBar();
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>
