@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frontend Intern Readiness Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              dark: "#0f172a",
+              card: "#1e293b",
+              primary: "#3b82f6",
+              success: "#10b981",
+            },
+            fontFamily: {
+              sans: ["Inter", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+      body {
+        background-color: #0f172a;
+        color: #f8fafc;
+      }
+
+      /* Custom Checkbox Animation */
+      .check-container {
+        display: flex;
+        align-items: flex-start;
+        cursor: pointer;
+        position: relative;
+        padding: 4px 0;
+        transition: all 0.2s ease;
+      }
+
+      .check-container:hover .label-text {
+        color: #e2e8f0;
+      }
+
+      .check-input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+      }
+
+      .checkmark {
+        flex-shrink: 0;
+        height: 20px;
+        width: 20px;
+        background-color: #0f172a;
+        border: 2px solid #334155;
+        border-radius: 6px;
+        margin-right: 12px;
+        margin-top: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .check-input:checked ~ .checkmark {
+        background-color: #10b981;
+        border-color: #10b981;
+      }
+
+      .checkmark:after {
+        content: "";
+        display: none;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+        margin-bottom: 2px;
+      }
+
+      .check-input:checked ~ .checkmark:after {
+        display: block;
+        animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      .check-input:checked ~ .label-text {
+        color: #64748b;
+        text-decoration: line-through;
+      }
+
+      .label-text {
+        color: #94a3b8;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        user-select: none;
+        transition: all 0.2s ease;
+      }
+
+      @keyframes popIn {
+        0% {
+          transform: rotate(45deg) scale(0);
+        }
+        100% {
+          transform: rotate(45deg) scale(1);
+        }
+      }
+
+      /* Glassmorphism for sticky header */
+      .glass-header {
+        background: rgba(30, 41, 59, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen p-4 md:p-8 font-sans antialiased selection:bg-primary selection:text-white"
+  >
+    <div class="max-w-6xl mx-auto">
+      <header class="text-center mb-10 mt-4">
+        <h1
+          class="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400 mb-3 tracking-tight"
+        >
+          Frontend Intern Readiness
+        </h1>
+        <p class="text-slate-400 font-medium text-lg">
+          30% Learning • 70% Building • Target: April
+        </p>
+        <div
+          class="mt-4 inline-block bg-slate-800 border border-slate-700 rounded-full px-4 py-1 text-sm text-emerald-400 font-semibold shadow-sm"
+        >
+          Rule: Max 3 days per project. No endless polishing.
+        </div>
+      </header>
+
+      <div
+        class="glass-header sticky top-4 z-50 border border-slate-700 rounded-2xl p-5 mb-10 shadow-2xl shadow-black/50"
+      >
+        <div class="flex justify-between items-end mb-3">
+          <div>
+            <h3 class="text-lg font-bold text-white tracking-wide">
+              Mission Progress
+            </h3>
+            <p class="text-xs text-slate-400 mt-1" id="stats-text">
+              0 / 0 tasks completed
+            </p>
+          </div>
+          <span
+            id="progress-text"
+            class="text-3xl font-black text-emerald-400 tabular-nums"
+            >0%</span
+          >
+        </div>
+        <div
+          class="w-full bg-slate-900 rounded-full h-3.5 border border-slate-800 overflow-hidden"
+        >
+          <div
+            id="progress-fill"
+            class="bg-gradient-to-r from-emerald-500 to-emerald-400 h-3.5 rounded-full transition-all duration-700 ease-out w-0 relative"
+          >
+            <div
+              class="absolute inset-0 bg-white/20 animate-pulse rounded-full"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+        id="app"
+      ></div>
+
+      <div class="mt-16 mb-8 text-center">
+        <button
+          onclick="resetProgress()"
+          class="group relative px-6 py-2.5 font-semibold text-slate-400 transition-all duration-200 ease-in-out hover:text-red-400"
+        >
+          <span
+            class="absolute inset-0 w-full h-full border border-slate-700 rounded-lg group-hover:border-red-500/50 group-hover:bg-red-500/10 transition-all duration-200"
+          ></span>
+          <span class="relative">Reset All Progress</span>
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const checklistData = [
+        {
+          title: "1. Core Web Fundamentals",
+          icon: "🌐",
+          items: [
+            "Semantic HTML (header, nav, main, section)",
+            "Forms & Accessibility basics",
+            "SEO basics & Meta tags",
+            "CSS Layout: Flexbox, Grid, Positioning",
+            "Responsive: Media queries, Mobile-first",
+            "CSS Units (px, %, em, rem, vh, vw)",
+            "Modern CSS (Variables, transitions)",
+          ],
+        },
+        {
+          title: "2. Advanced JavaScript",
+          icon: "⚡",
+          items: [
+            "Core JS (let/const, arrows, destructuring)",
+            "Array Methods (map, filter, reduce, find)",
+            "Object Methods (keys, values, entries)",
+            "Async JS (Promises, async/await, Fetch)",
+            "JS Concepts (Closures, Scope, Hoisting)",
+            "Event Loop & 'this' keyword",
+          ],
+        },
+        {
+          title: "3. DOM & Browser APIs",
+          icon: "🖥️",
+          items: [
+            "DOM Manipulation (querySelector)",
+            "Events (Listeners, Bubbling, Delegation)",
+            "Web Storage (localStorage, sessionStorage)",
+          ],
+        },
+        {
+          title: "4. React Core",
+          icon: "⚛️",
+          items: [
+            "Components, Props, JSX, State",
+            "Hooks: useState, useEffect, useRef",
+            "Patterns: Lifting state, Controlled inputs",
+            "Conditional rendering, Lists & Keys",
+            "React Router (Routes, Route, useNavigate)",
+            "API Integration (fetch/axios, loading, errors)",
+          ],
+        },
+        {
+          title: "5. State & Architecture",
+          icon: "🏗️",
+          items: [
+            "Context API for global state",
+            "Redux Toolkit basics",
+            "Component architecture & reusability",
+          ],
+        },
+        {
+          title: "6. Styling in React",
+          icon: "🎨",
+          items: [
+            "Tailwind CSS (Utility-first)",
+            "CSS Modules or Styled Components",
+          ],
+        },
+        {
+          title: "7. Version Control (Git)",
+          icon: "🌿",
+          items: [
+            "git init, clone, add, commit",
+            "git push, pull",
+            "git branch, merge, clean commits",
+          ],
+        },
+        {
+          title: "8. Build & Deploy",
+          icon: "🚀",
+          items: [
+            "npm basics & package.json",
+            "Vite ecosystem",
+            "Deploy to Vercel or Netlify",
+            "Sharing live links",
+          ],
+        },
+        {
+          title: "9. Interview Prep",
+          icon: "🗣️",
+          items: [
+            "Explain: Virtual DOM & React lifecycle",
+            "Explain: useEffect & Dependency arrays",
+            "Explain: Props vs State",
+            "Explain: Controlled vs Uncontrolled",
+          ],
+        },
+        {
+          title: "10. The Absolute 10 Projects",
+          icon: "🔥",
+          items: [
+            "1. Advanced Kanban Task Manager (Foundation, D&D)",
+            "2. Job Application Tracker (CRUD, Filters, Sort)",
+            "3. Movie & Media Explorer (API, Routing, Params)",
+            "4. Weather & Travel Hub (Chained APIs, Geolocation)",
+            "5. Live Crypto Dashboard (WebSockets/Live Data, Charts)",
+            "6. E-Commerce Store & Cart (Global State, Complex UI)",
+            "7. Admin Analytics Dashboard (Layouts, Tables, Charts)",
+            "8. Role-Based Issue Tracker (Auth UI, Protected Routes)",
+            "9. Markdown Notes App (Persistence, Parsing)",
+            "10. CAPSTONE: Full SaaS UI (Combines everything)",
+          ],
+        },
+      ];
+
+      const appContainer = document.getElementById("app");
+      const progressFill = document.getElementById("progress-fill");
+      const progressText = document.getElementById("progress-text");
+      const statsText = document.getElementById("stats-text");
+
+      let totalItems = 0;
+      let checkedItems = 0;
+      const STORAGE_KEY = "reactInternChecklistV2"; // Versioned key
+
+      function init() {
+        renderChecklist();
+        loadProgress();
+        updateProgressBar();
+
+        appContainer.addEventListener("change", (e) => {
+          if (e.target.type === "checkbox") {
+            saveProgress();
+            updateProgressBar();
+          }
+        });
+      }
+
+      function renderChecklist() {
+        let html = "";
+
+        checklistData.forEach((section, sectionIndex) => {
+          // Make the Projects section span full width or 2 cols on large screens
+          const colSpan = section.title.includes("Absolute 10")
+            ? "md:col-span-2 xl:col-span-3 bg-slate-800/50 border-emerald-500/30"
+            : "bg-card border-slate-700";
+          const titleColor = section.title.includes("Absolute 10")
+            ? "text-emerald-400"
+            : "text-primary";
+
+          html += `<div class="rounded-2xl border ${colSpan} p-6 shadow-lg hover:border-slate-500 transition-colors duration-300">
+                            <h2 class="text-xl font-bold ${titleColor} mb-5 flex items-center gap-2 border-b border-slate-700/50 pb-3">
+                                <span>${section.icon}</span> ${section.title}
+                            </h2>
+                            <div class="space-y-1">`;
+
+          section.items.forEach((item, itemIndex) => {
+            totalItems++;
+            const id = `item-${sectionIndex}-${itemIndex}`;
+            html += `
+                        <label class="check-container group" for="${id}">
+                            <input type="checkbox" id="${id}" class="check-input">
+                            <span class="checkmark shadow-sm"></span>
+                            <span class="label-text mt-0.5">${item}</span>
+                        </label>
+                    `;
+          });
+
+          html += `</div></div>`;
+        });
+
+        appContainer.innerHTML = html;
+      }
+
+      function saveProgress() {
+        const checkboxes = document.querySelectorAll(".check-input");
+        const savedData = {};
+        checkboxes.forEach((box) => {
+          savedData[box.id] = box.checked;
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(savedData));
+      }
+
+      function loadProgress() {
+        const savedData = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (!savedData) return;
+        const checkboxes = document.querySelectorAll(".check-input");
+        checkboxes.forEach((box) => {
+          if (savedData[box.id]) box.checked = true;
+        });
+      }
+
+      function updateProgressBar() {
+        const checkboxes = document.querySelectorAll(".check-input");
+        checkedItems = Array.from(checkboxes).filter(
+          (box) => box.checked,
+        ).length;
+
+        const percentage = Math.round((checkedItems / totalItems) * 100) || 0;
+
+        progressFill.style.width = `${percentage}%`;
+        progressText.innerText = `${percentage}%`;
+        statsText.innerText = `${checkedItems} / ${totalItems} tasks completed`;
+      }
+
+      function resetProgress() {
+        if (confirm("Are you sure you want to reset all progress?")) {
+          localStorage.removeItem(STORAGE_KEY);
+          document
+            .querySelectorAll(".check-input")
+            .forEach((box) => (box.checked = false));
+          updateProgressBar();
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>
